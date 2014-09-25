@@ -60,6 +60,8 @@ func init() {
 	nap.ResponseHeaders = []nap.Header{
 		nap.Header{"Access-Control-Allow-Origin", []string{"*"}},
 		nap.Header{"Access-Control-Allow-Methods", []string{"OPTIONS, PUT"}},
+		nap.Header{"Content-Type", []string{"application/json"}},
+		nap.Header{"Cache-Control", []string{"no-cache,must-revalidate"}},
 	}
 }
 
