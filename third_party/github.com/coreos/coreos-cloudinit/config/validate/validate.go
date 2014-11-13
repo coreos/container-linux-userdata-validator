@@ -1,67 +1,114 @@
+/*
+   Copyright 2014 CoreOS, Inc.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 package validate
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
+
+	"github.com/coreos/coreos-cloudinit-validate/third_party/github.com/coreos/coreos-cloudinit/config"
+
+	"github.com/coreos/coreos-cloudinit-validate/third_party/github.com/coreos/coreos-cloudinit/Godeps/_workspace/src/gopkg.in/yaml.v1"
 )
 
-type Reporter interface {
-	Error(line int, message string)
-	Warning(line int, message string)
-	Entries() []Entry
-}
+var (
+	yamlLineError = regexp.MustCompile(`^YAML error: line (?P<line>[[:digit:]]+): (?P<msg>.*)$`)
+	yamlError     = regexp.MustCompile(`^YAML error: (?P<msg>.*)$`)
+)
 
-type context struct {
-	content []byte
-	line    int
-}
-
-type rule func(context context, validator *validator)
-
-type test struct {
-	context context
-	rule    rule
-}
-
-type validator struct {
-	report Reporter
-	tests  []test
-}
-
-func (v *validator) addRules(c context, rs ...rule) {
-	for _, r := range rs {
-		v.tests = append(v.tests, test{c, r})
+// Validate runs a series of validation tests against the given userdata and
+// returns a report detailing all of the issues. Presently, only cloud-configs
+// can be validated.
+func Validate(userdataBytes []byte) (Report, error) {
+	switch {
+	case config.IsScript(string(userdataBytes)):
+		return Report{}, nil
+	case config.IsCloudConfig(string(userdataBytes)):
+		return validateCloudConfig(userdataBytes, Rules)
+	default:
+		return Report{entries: []Entry{
+			Entry{kind: entryError, message: `must be "#cloud-config" or begin with "#!"`, line: 1},
+		}}, nil
 	}
 }
 
-func Validate(config []byte) (Reporter, error) {
-	v := &validator{&Report{}, []test{{context{config, 0}, baseRule}}}
-
-	for len(v.tests) > 0 {
-		t := v.tests[0]
-		v.tests = v.tests[1:]
-
-		if err := func(t test, v *validator) (err error) {
-			defer func() {
-				if r := recover(); r != nil {
-					err = fmt.Errorf("%s", r)
-				}
-			}()
-			t.rule(t.context, v)
-			return nil
-		}(t, v); err != nil {
-			return v.report, err
+// validateCloudConfig runs all of the validation rules in Rules and returns
+// the resulting report and any errors encountered.
+func validateCloudConfig(config []byte, rules []rule) (report Report, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
 		}
+	}()
+
+	c, err := parseCloudConfig(config, &report)
+	if err != nil {
+		return report, err
 	}
 
-	return v.report, nil
+	c = normalizeNodeNames(c, &report)
+	for _, r := range rules {
+		r(c, &report)
+	}
+	return report, nil
 }
 
-func baseRule(c context, v *validator) {
-	header := strings.SplitN(string(c.content), "\n", 2)[0]
-	if header == "#cloud-config" {
-		v.addRules(c, YamlRules...)
-	} else if !strings.HasPrefix("#!", header) {
-		v.report.Error(c.line+1, "must be \"#cloud-config\" or \"#!\"")
+// parseCloudConfig parses the provided config into a node structure and logs
+// any parsing issues into the provided report. Unrecoverable errors are
+// returned as an error.
+func parseCloudConfig(config []byte, report *Report) (n node, err error) {
+	var raw map[interface{}]interface{}
+	if err := yaml.Unmarshal(config, &raw); err != nil {
+		matches := yamlLineError.FindStringSubmatch(err.Error())
+		if len(matches) == 3 {
+			line, err := strconv.Atoi(matches[1])
+			if err != nil {
+				return n, err
+			}
+			msg := matches[2]
+			report.Error(line, msg)
+			return n, nil
+		}
+
+		matches = yamlError.FindStringSubmatch(err.Error())
+		if len(matches) == 2 {
+			report.Error(1, matches[1])
+			return n, nil
+		}
+
+		return n, errors.New("couldn't parse yaml error")
 	}
+
+	return NewNode(raw, NewContext(config)), nil
+}
+
+// normalizeNodeNames replaces all occurences of '-' with '_' within key names
+// and makes a note of each replacement in the report.
+func normalizeNodeNames(node node, report *Report) node {
+	if strings.Contains(node.name, "-") {
+		// TODO(crawford): Enable this message once the new validator hits stable.
+		//report.Info(node.line, fmt.Sprintf("%q uses '-' instead of '_'", node.name))
+		node.name = strings.Replace(node.name, "-", "_", -1)
+	}
+	for i := range node.children {
+		node.children[i] = normalizeNodeNames(node.children[i], report)
+	}
+	return node
 }

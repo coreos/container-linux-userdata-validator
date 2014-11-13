@@ -16,17 +16,17 @@
 
 package config
 
-type Unit struct {
-	Name    string       `yaml:"name"`
-	Mask    bool         `yaml:"mask"`
-	Enable  bool         `yaml:"enable"`
-	Runtime bool         `yaml:"runtime"`
-	Content string       `yaml:"content"`
-	Command string       `yaml:"command" valid:"start,stop,restart,reload,try-restart,reload-or-restart,reload-or-try-restart"`
-	DropIns []UnitDropIn `yaml:"drop_ins"`
+import (
+	"strings"
+)
+
+type Script []byte
+
+func IsScript(userdata string) bool {
+	header := strings.SplitN(userdata, "\n", 2)[0]
+	return strings.HasPrefix(header, "#!")
 }
 
-type UnitDropIn struct {
-	Name    string `yaml:"name"`
-	Content string `yaml:"content"`
+func NewScript(userdata string) (Script, error) {
+	return Script(userdata), nil
 }

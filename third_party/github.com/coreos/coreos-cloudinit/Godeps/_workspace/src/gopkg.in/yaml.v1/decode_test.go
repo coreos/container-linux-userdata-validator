@@ -2,7 +2,7 @@ package yaml_test
 
 import (
 	. "gopkg.in/check.v1"
-	"gopkg.in/yaml.v1"
+	"github.com/coreos/coreos-cloudinit/Godeps/_workspace/src/gopkg.in/yaml.v1"
 	"math"
 	"reflect"
 	"time"
@@ -372,7 +372,7 @@ var unmarshalTests = []struct {
 		map[string]time.Duration{"a": 3 * time.Second},
 	},
 
-	// Issue #24. 
+	// Issue #24.
 	{
 		"a: <foo>",
 		map[string]string{"a": "<foo>"},
