@@ -1,18 +1,16 @@
-/*
-   Copyright 2014 CoreOS, Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
+// Copyright 2015 CoreOS, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package validate
 
@@ -62,27 +60,27 @@ func TestCheckEncoding(t *testing.T) {
 	}{
 		{},
 		{
-			config: "write_files:\n  - encoding: base64\n    contents: aGVsbG8K",
+			config: "write_files:\n  - encoding: base64\n    content: aGVsbG8K",
 		},
 		{
-			config: "write_files:\n  - contents: !!binary aGVsbG8K",
+			config: "write_files:\n  - content: !!binary aGVsbG8K",
 		},
 		{
-			config:  "write_files:\n  - encoding: base64\n    contents: !!binary aGVsbG8K",
-			entries: []Entry{{entryError, `contents cannot be decoded as "base64"`, 3}},
+			config:  "write_files:\n  - encoding: base64\n    content: !!binary aGVsbG8K",
+			entries: []Entry{{entryError, `content cannot be decoded as "base64"`, 3}},
 		},
 		{
-			config: "write_files:\n  - encoding: base64\n    contents: !!binary YUdWc2JHOEsK",
+			config: "write_files:\n  - encoding: base64\n    content: !!binary YUdWc2JHOEsK",
 		},
 		{
-			config: "write_files:\n  - encoding: gzip\n    contents: !!binary H4sIAOC3tVQAA8tIzcnJ5wIAIDA6NgYAAAA=",
+			config: "write_files:\n  - encoding: gzip\n    content: !!binary H4sIAOC3tVQAA8tIzcnJ5wIAIDA6NgYAAAA=",
 		},
 		{
-			config: "write_files:\n  - encoding: gzip+base64\n    contents: H4sIAOC3tVQAA8tIzcnJ5wIAIDA6NgYAAAA=",
+			config: "write_files:\n  - encoding: gzip+base64\n    content: H4sIAOC3tVQAA8tIzcnJ5wIAIDA6NgYAAAA=",
 		},
 		{
-			config:  "write_files:\n  - encoding: custom\n    contents: hello",
-			entries: []Entry{{entryError, `contents cannot be decoded as "custom"`, 3}},
+			config:  "write_files:\n  - encoding: custom\n    content: hello",
+			entries: []Entry{{entryError, `content cannot be decoded as "custom"`, 3}},
 		},
 	}
 
