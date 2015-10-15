@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/coreos/coreos-cloudinit-validate/third_party/github.com/coreos/coreos-cloudinit/config"
+	"github.com/coreos/coreos-userdata-validator/third_party/github.com/coreos/coreos-cloudinit/config"
 )
 
 type rule func(config node, report *Report)

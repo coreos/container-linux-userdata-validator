@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/coreos/coreos-cloudinit-validate/third_party/github.com/gorilla/context"
+	"github.com/coreos/coreos-userdata-validator/third_party/github.com/gorilla/context"
 )
 
 type routeTest struct {
