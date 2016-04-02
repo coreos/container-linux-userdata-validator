@@ -21,9 +21,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coreos/coreos-userdata-validator/third_party/github.com/coreos/coreos-cloudinit/config"
+	"github.com/coreos/coreos-cloudinit/config"
 
-	"github.com/coreos/coreos-userdata-validator/third_party/github.com/coreos/coreos-cloudinit/Godeps/_workspace/src/github.com/coreos/yaml"
+	"github.com/coreos/coreos-cloudinit/Godeps/_workspace/src/github.com/coreos/yaml"
 )
 
 var (

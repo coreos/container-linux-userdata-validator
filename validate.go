@@ -24,9 +24,9 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/coreos/coreos-userdata-validator/third_party/github.com/coreos/coreos-cloudinit/config/validate"
-	"github.com/coreos/coreos-userdata-validator/third_party/github.com/crawford/nap"
-	"github.com/coreos/coreos-userdata-validator/third_party/github.com/gorilla/mux"
+	"github.com/coreos/coreos-cloudinit/config/validate"
+	"github.com/crawford/nap"
+	"github.com/gorilla/mux"
 )
 
 var (
