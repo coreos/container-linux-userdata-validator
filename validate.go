@@ -25,6 +25,7 @@ import (
 	"runtime/debug"
 
 	"github.com/coreos/coreos-cloudinit/config/validate"
+	ignConfig "github.com/coreos/ignition/config"
 	"github.com/crawford/nap"
 	"github.com/gorilla/mux"
 )
@@ -92,10 +93,18 @@ func putValidate(r *http.Request) (interface{}, nap.Status) {
 	}
 
 	config := bytes.Replace(body, []byte("\r"), []byte{}, -1)
-	if report, err := validate.Validate(config); err == nil {
+
+	_, report, err := ignConfig.Parse(config)
+	switch err {
+	case ignConfig.ErrCloudConfig, ignConfig.ErrEmpty, ignConfig.ErrScript:
+		report, err := validate.Validate(config)
+		if err != nil {
+			return nil, nap.InternalError{err.Error()}
+		}
 		return report.Entries(), nap.OK{}
-	} else {
-		return nil, nap.InternalError{err.Error()}
+	default:
+		report.Sort()
+		return report.Entries, nap.OK{}
 	}
 }
 
