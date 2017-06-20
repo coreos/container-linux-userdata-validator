@@ -21,11 +21,13 @@ import (
 
 	"github.com/coreos/ignition/config/types"
 	"github.com/coreos/ignition/config/v1"
+	"github.com/coreos/ignition/config/v2_0"
 	"github.com/coreos/ignition/config/validate"
 	astjson "github.com/coreos/ignition/config/validate/astjson"
 	"github.com/coreos/ignition/config/validate/report"
 
 	json "github.com/ajeddeloh/go-json"
+	"github.com/coreos/go-semver/semver"
 	"go4.org/errorutil"
 )
 
@@ -40,14 +42,20 @@ var (
 // Parse parses the raw config into a types.Config struct and generates a report of any
 // errors, warnings, info, and deprecations it encountered
 func Parse(rawConfig []byte) (types.Config, report.Report, error) {
-	switch majorVersion(rawConfig) {
-	case 1:
+	version, err := version(rawConfig)
+	if err != nil {
+		return types.Config{}, report.ReportFromError(err, report.EntryError), err
+	}
+	switch version {
+	case semver.Version{Major: 1}:
 		config, err := ParseFromV1(rawConfig)
 		if err != nil {
 			return types.Config{}, report.ReportFromError(err, report.EntryError), err
 		}
 
 		return config, report.ReportFromError(ErrDeprecated, report.EntryDeprecated), nil
+	case semver.Version{Major: 2, Minor: 0}:
+		return ParseFromV2_0(rawConfig)
 	default:
 		return ParseFromLatest(rawConfig)
 	}
@@ -67,7 +75,7 @@ func ParseFromLatest(rawConfig []byte) (types.Config, report.Report, error) {
 
 	// These errors are fatal and the config should not be further validated
 	if err = json.Unmarshal(rawConfig, &config); err == nil {
-		versionReport := config.Ignition.Version.Validate()
+		versionReport := config.Ignition.Validate()
 		if versionReport.IsFatal() {
 			return types.Config{}, versionReport, ErrInvalid
 		}
@@ -136,29 +144,39 @@ func ParseFromV1(rawConfig []byte) (types.Config, error) {
 		return types.Config{}, err
 	}
 
-	return TranslateFromV1(config)
+	return TranslateFromV1(config), nil
 }
 
-func majorVersion(rawConfig []byte) int64 {
+func ParseFromV2_0(rawConfig []byte) (types.Config, report.Report, error) {
+	cfg, report, err := v2_0.Parse(rawConfig)
+	if err != nil {
+		return types.Config{}, report, err
+	}
+
+	return TranslateFromV2_0(cfg), report, err
+}
+
+func version(rawConfig []byte) (semver.Version, error) {
 	var composite struct {
 		Version  *int `json:"ignitionVersion"`
 		Ignition struct {
-			Version *types.IgnitionVersion `json:"version"`
+			Version *string `json:"version"`
 		} `json:"ignition"`
 	}
 
-	if json.Unmarshal(rawConfig, &composite) != nil {
-		return 0
+	if json.Unmarshal(rawConfig, &composite) == nil {
+		if composite.Ignition.Version != nil {
+			v, err := types.Ignition{Version: *composite.Ignition.Version}.Semver()
+			if err != nil {
+				return semver.Version{}, err
+			}
+			return *v, nil
+		} else if composite.Version != nil {
+			return semver.Version{Major: int64(*composite.Version)}, nil
+		}
 	}
 
-	var major int64
-	if composite.Ignition.Version != nil {
-		major = composite.Ignition.Version.Major
-	} else if composite.Version != nil {
-		major = int64(*composite.Version)
-	}
-
-	return major
+	return semver.Version{}, nil
 }
 
 func isEmpty(userdata []byte) bool {

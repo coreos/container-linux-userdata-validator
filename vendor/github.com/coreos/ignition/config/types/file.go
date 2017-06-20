@@ -16,51 +16,47 @@ package types
 
 import (
 	"errors"
-	"os"
+	"fmt"
 
 	"github.com/coreos/ignition/config/validate/report"
 )
 
 var (
-	ErrFileIllegalMode = errors.New("illegal file mode")
-	ErrNoFilesystem    = errors.New("no filesystem specified")
+	ErrCompressionInvalid = errors.New("invalid compression method")
 )
 
-type File struct {
-	Filesystem string       `json:"filesystem,omitempty"`
-	Path       Path         `json:"path,omitempty"`
-	Contents   FileContents `json:"contents,omitempty"`
-	Mode       FileMode     `json:"mode,omitempty"`
-	User       FileUser     `json:"user,omitempty"`
-	Group      FileGroup    `json:"group,omitempty"`
-}
-
-func (f File) Validate() report.Report {
-	if f.Filesystem == "" {
-		return report.ReportFromError(ErrNoFilesystem, report.EntryError)
+func (f File) ValidateMode() report.Report {
+	r := report.Report{}
+	if err := validateMode(f.Mode); err != nil {
+		r.Add(report.Entry{
+			Message: err.Error(),
+			Kind:    report.EntryError,
+		})
 	}
-	return report.Report{}
+	return r
 }
 
-type FileUser struct {
-	Id int `json:"id,omitempty"`
-}
-
-type FileGroup struct {
-	Id int `json:"id,omitempty"`
-}
-
-type FileContents struct {
-	Compression  Compression  `json:"compression,omitempty"`
-	Source       Url          `json:"source,omitempty"`
-	Verification Verification `json:"verification,omitempty"`
-}
-
-type FileMode os.FileMode
-
-func (m FileMode) Validate() report.Report {
-	if (m &^ 07777) != 0 {
-		return report.ReportFromError(ErrFileIllegalMode, report.EntryError)
+func (fc FileContents) ValidateCompression() report.Report {
+	r := report.Report{}
+	switch fc.Compression {
+	case "", "gzip":
+	default:
+		r.Add(report.Entry{
+			Message: ErrCompressionInvalid.Error(),
+			Kind:    report.EntryError,
+		})
 	}
-	return report.Report{}
+	return r
+}
+
+func (fc FileContents) ValidateSource() report.Report {
+	r := report.Report{}
+	err := validateURL(fc.Source)
+	if err != nil {
+		r.Add(report.Entry{
+			Message: fmt.Sprintf("invalid url %q: %v", fc.Source, err),
+			Kind:    report.EntryError,
+		})
+	}
+	return r
 }
