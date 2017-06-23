@@ -1,0 +1,46 @@
+hash: 4aaea06abc7824ece67d062216f13bf96a7d70753e168746719df59c904fb488
+updated: 2017-06-20T14:12:33.489329493-07:00
+imports:
+- name: github.com/ajeddeloh/go-json
+  version: 73d058cf8437a1989030afe571eeab9f90eebbbd
+- name: github.com/coreos/coreos-cloudinit
+  version: 5be99bf577f2768193c7fb587ef5a8806c1503cf
+  subpackages:
+  - config
+  - config/validate
+- name: github.com/coreos/go-semver
+  version: 294930c1e79c64e7dbe360054274fdad492c8cf5
+  subpackages:
+  - semver
+- name: github.com/coreos/go-systemd
+  version: 7c9533367ef925dc1078d75e5b7141e10da2c4e8
+  subpackages:
+  - dbus
+  - unit
+- name: github.com/coreos/ignition
+  version: fc0b780c05dbf64696dfb33bbd704a9a3afcd34b
+  subpackages:
+  - config
+  - config/types
+  - config/v1
+  - config/v1/types
+  - config/v2_0
+  - config/v2_0/types
+  - config/validate
+  - config/validate/astjson
+  - config/validate/report
+- name: github.com/coreos/yaml
+  version: 6b16a5714269b2f70720a45406b1babd947a17ef
+- name: github.com/crawford/nap
+  version: b8a59dd5865651e5006eed1d919ecc3c87d22b08
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: bcd8bc72b08df0f70df986b97f95590779502d31
+- name: github.com/vincent-petithory/dataurl
+  version: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
+- name: go4.org
+  version: 03efcb870d84809319ea509714dd6d19a1498483
+  subpackages:
+  - errorutil
+testImports: []
