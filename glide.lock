@@ -1,5 +1,5 @@
-hash: 4aaea06abc7824ece67d062216f13bf96a7d70753e168746719df59c904fb488
-updated: 2017-06-20T14:12:33.489329493-07:00
+hash: 4d2a7238f2cc4335e89926882e6bc6c7b73091da1e5a3eab2912f555a1a7c3cb
+updated: 2017-07-10T11:06:23.754641692-07:00
 imports:
 - name: github.com/ajeddeloh/go-json
   version: 73d058cf8437a1989030afe571eeab9f90eebbbd
@@ -18,7 +18,7 @@ imports:
   - dbus
   - unit
 - name: github.com/coreos/ignition
-  version: fc0b780c05dbf64696dfb33bbd704a9a3afcd34b
+  version: e6a8281592b13fd582157d7dd44777ca9851d842
   subpackages:
   - config
   - config/types
@@ -26,6 +26,8 @@ imports:
   - config/v1/types
   - config/v2_0
   - config/v2_0/types
+  - config/v2_1
+  - config/v2_1/types
   - config/validate
   - config/validate/astjson
   - config/validate/report

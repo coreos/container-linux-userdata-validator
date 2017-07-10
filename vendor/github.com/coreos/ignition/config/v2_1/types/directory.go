@@ -1,4 +1,4 @@
-// Copyright 2016 CoreOS, Inc.
+// Copyright 2017 CoreOS, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,35 +15,16 @@
 package types
 
 import (
-	"errors"
-	"net/url"
-
-	"github.com/vincent-petithory/dataurl"
+	"github.com/coreos/ignition/config/validate/report"
 )
 
-var (
-	ErrInvalidScheme = errors.New("invalid url scheme")
-)
-
-func validateURL(s string) error {
-	// Empty url is valid, indicates an empty file
-	if s == "" {
-		return nil
+func (d Directory) ValidateMode() report.Report {
+	r := report.Report{}
+	if err := validateMode(d.Mode); err != nil {
+		r.Add(report.Entry{
+			Message: err.Error(),
+			Kind:    report.EntryError,
+		})
 	}
-	u, err := url.Parse(s)
-	if err != nil {
-		return err
-	}
-
-	switch u.Scheme {
-	case "http", "https", "oem", "tftp", "s3":
-		return nil
-	case "data":
-		if _, err := dataurl.DecodeString(s); err != nil {
-			return err
-		}
-		return nil
-	default:
-		return ErrInvalidScheme
-	}
+	return r
 }
