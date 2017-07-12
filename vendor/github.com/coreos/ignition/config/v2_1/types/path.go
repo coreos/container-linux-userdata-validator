@@ -16,34 +16,16 @@ package types
 
 import (
 	"errors"
-	"net/url"
-
-	"github.com/vincent-petithory/dataurl"
+	"path"
 )
 
 var (
-	ErrInvalidScheme = errors.New("invalid url scheme")
+	ErrPathRelative = errors.New("path not absolute")
 )
 
-func validateURL(s string) error {
-	// Empty url is valid, indicates an empty file
-	if s == "" {
-		return nil
+func validatePath(p string) error {
+	if !path.IsAbs(p) {
+		return ErrPathRelative
 	}
-	u, err := url.Parse(s)
-	if err != nil {
-		return err
-	}
-
-	switch u.Scheme {
-	case "http", "https", "oem", "tftp", "s3":
-		return nil
-	case "data":
-		if _, err := dataurl.DecodeString(s); err != nil {
-			return err
-		}
-		return nil
-	default:
-		return ErrInvalidScheme
-	}
+	return nil
 }
