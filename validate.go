@@ -104,12 +104,10 @@ func putValidate(r *http.Request) (interface{}, nap.Status) {
 		}
 		return rpt.Entries(), nap.OK{}
 	case ignConfig.ErrUnknownVersion:
-		return report.Report{
-			Entries: []report.Entry{{
-				Kind:    report.EntryError,
-				Message: "Failed to parse config. Is this a valid Ignition Config, Cloud-Config, or script?",
-			}},
-		}, nap.OK{}
+		return []report.Entry{{
+			Kind:    report.EntryError,
+			Message: "Failed to parse config. Is this a valid Ignition Config, Cloud-Config, or script?",
+		}}, nap.OK{}
 	default:
 		rpt.Sort()
 		return rpt.Entries, nap.OK{}
