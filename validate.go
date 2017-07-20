@@ -94,17 +94,17 @@ func putValidate(r *http.Request) (interface{}, nap.Status) {
 
 	config := bytes.Replace(body, []byte("\r"), []byte{}, -1)
 
-	_, report, err := ignConfig.Parse(config)
+	_, rpt, err := ignConfig.Parse(config)
 	switch err {
 	case ignConfig.ErrCloudConfig, ignConfig.ErrEmpty, ignConfig.ErrScript:
-		report, err := validate.Validate(config)
+		rpt, err := validate.Validate(config)
 		if err != nil {
 			return nil, nap.InternalError{err.Error()}
 		}
-		return report.Entries(), nap.OK{}
+		return rpt.Entries(), nap.OK{}
 	default:
-		report.Sort()
-		return report.Entries, nap.OK{}
+		rpt.Sort()
+		return rpt.Entries, nap.OK{}
 	}
 }
 
