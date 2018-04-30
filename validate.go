@@ -25,7 +25,8 @@ import (
 	"runtime/debug"
 
 	"github.com/coreos/coreos-cloudinit/config/validate"
-	ignConfig "github.com/coreos/ignition/config"
+	"github.com/coreos/ignition/config/shared/errors"
+	ignConfig "github.com/coreos/ignition/config/v2_2"
 	"github.com/coreos/ignition/config/validate/report"
 	"github.com/crawford/nap"
 	"github.com/gorilla/mux"
@@ -97,13 +98,13 @@ func putValidate(r *http.Request) (interface{}, nap.Status) {
 
 	_, rpt, err := ignConfig.Parse(config)
 	switch err {
-	case ignConfig.ErrCloudConfig, ignConfig.ErrEmpty, ignConfig.ErrScript:
+	case errors.ErrCloudConfig, errors.ErrEmpty, errors.ErrScript:
 		rpt, err := validate.Validate(config)
 		if err != nil {
 			return nil, nap.InternalError{err.Error()}
 		}
 		return rpt.Entries(), nap.OK{}
-	case ignConfig.ErrUnknownVersion:
+	case errors.ErrUnknownVersion:
 		return []report.Entry{{
 			Kind:    report.EntryError,
 			Message: "Failed to parse config. Is this a valid Ignition Config, Cloud-Config, or script?",
