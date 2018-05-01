@@ -1,10 +1,10 @@
-hash: 4d2a7238f2cc4335e89926882e6bc6c7b73091da1e5a3eab2912f555a1a7c3cb
-updated: 2017-07-10T11:06:23.754641692-07:00
+hash: 361698403c3a67ca32aabb1ce778355419ad0c27cc0203078b4a4c6de99da88a
+updated: 2018-04-30T16:06:07.780123753-07:00
 imports:
 - name: github.com/ajeddeloh/go-json
   version: 73d058cf8437a1989030afe571eeab9f90eebbbd
 - name: github.com/coreos/coreos-cloudinit
-  version: 5be99bf577f2768193c7fb587ef5a8806c1503cf
+  version: f1f0405491dfd073bbf074f7e374c9ef85600691
   subpackages:
   - config
   - config/validate
@@ -13,23 +13,29 @@ imports:
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
-  version: 7c9533367ef925dc1078d75e5b7141e10da2c4e8
+  version: 40e2722dffead74698ca12a750f64ef313ddce05
   subpackages:
   - dbus
   - unit
 - name: github.com/coreos/ignition
-  version: e6a8281592b13fd582157d7dd44777ca9851d842
+  version: 8bc8a13ee812ce0755be0245808c3044a7ef0add
   subpackages:
   - config
-  - config/types
+  - config/shared/errors
+  - config/shared/validations
+  - config/util
   - config/v1
   - config/v1/types
   - config/v2_0
   - config/v2_0/types
   - config/v2_1
   - config/v2_1/types
+  - config/v2_2
+  - config/v2_2/types
+  - config/v2_3_experimental/types
   - config/validate
   - config/validate/astjson
+  - config/validate/astnode
   - config/validate/report
 - name: github.com/coreos/yaml
   version: 6b16a5714269b2f70720a45406b1babd947a17ef
@@ -38,7 +44,7 @@ imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: bcd8bc72b08df0f70df986b97f95590779502d31
+  version: 53c1911da2b537f792e7cafcb446b05ffe33b996
 - name: github.com/vincent-petithory/dataurl
   version: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - name: go4.org
